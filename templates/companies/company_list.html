@@ -1,0 +1,178 @@
+{% extends "base.html" %} {% block title %}Companies | Job Tracker{% endblock %}
+{% block main_class %}wide-main{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1>Company shortlist</h1>
+  <a class="button" href="{% url 'company_create' %}">Add company</a>
+</div>
+
+<section class="dashboard five-metrics" aria-label="Company outreach summary">
+  <div class="metric">
+    <span>Companies</span><strong>{{ summary.total }}</strong>
+  </div>
+  <div class="metric">
+    <span>Not contacted</span><strong>{{ summary.not_contacted }}</strong>
+  </div>
+  <div class="metric">
+    <span>Contacted</span><strong>{{ summary.contacted }}</strong>
+  </div>
+  <div class="metric">
+    <span>People</span><strong>{{ summary.contacts }}</strong>
+  </div>
+  <div class="metric">
+    <span>Follow-ups due</span><strong>{{ summary.followups_due }}</strong>
+  </div>
+</section>
+
+<form class="filters" method="get">
+  <div class="filter-field filter-search">
+    <label for="filter-search">Search companies and contacts</label>
+    <input
+      id="filter-search"
+      name="q"
+      value="{{ search }}"
+      placeholder="Company, category, location, contact"
+      onchange="this.form.requestSubmit()"
+    />
+  </div>
+  <div class="filter-field">
+    <label for="filter-status">Outreach status</label>
+    <select id="filter-status" name="status" onchange="this.form.requestSubmit()">
+      <option value="">All statuses</option>
+      {% for value, label, is_selected in status_choices %}
+      <option value="{{ value }}"{{ is_selected|yesno:" selected," }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field">
+    <label for="filter-size">Company size</label>
+    <select id="filter-size" name="size" onchange="this.form.requestSubmit()">
+      <option value="">All sizes</option>
+      {% for value, label, is_selected in size_choices %}
+      <option value="{{ value }}"{{ is_selected|yesno:" selected," }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field">
+    <label for="filter-sort">Sort by</label>
+    <select id="filter-sort" name="sort" onchange="this.form.requestSubmit()">
+      {% for value, label, is_selected in sort_choices %}
+      <option value="{{ value }}"{{ is_selected|yesno:" selected," }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <a class="button secondary filters-reset" href="{% url 'company_list' %}">Reset</a>
+</form>
+
+{% if companies %}
+<div class="company-table-wrap">
+<table class="company-table">
+  <colgroup>
+    <col style="width: 3%">
+    <col style="width: 12%">
+    <col style="width: 7%">
+    <col style="width: 10%">
+    <col style="width: 8%">
+    <col style="width: 20%">
+    <col style="width: 6%">
+    <col style="width: 6%">
+    <col style="width: 9%">
+    <col style="width: 5%">
+    <col style="width: 8%">
+    <col style="width: 6%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>No.</th>
+      <th>Company</th>
+      <th>Size</th>
+      <th>Category</th>
+      <th>Location</th>
+      <th>Phone / email</th>
+      <th>Website</th>
+      <th>LinkedIn</th>
+      <th>Status</th>
+      <th>People</th>
+      <th>Follow-up</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for company in companies %}
+    <tr>
+      <td class="company-number" data-label="No.">{{ forloop.counter }}</td>
+      <td data-label="Company">
+        <a href="{% url 'company_detail' company.pk %}"
+          ><strong>{{ company.name }}</strong></a
+        >
+      </td>
+      <td data-label="Size">{{ company.get_size_display }}</td>
+      <td data-label="Category">{{ company.category|default:"-" }}</td>
+      <td data-label="Location">{{ company.location|default:"-" }}</td>
+      <td class="company-contact-cell" data-label="Phone / email">
+        {% if company.phone %}
+        <div>
+          {{ company.phone }}
+          <button class="copy-control" type="button" data-copy-text="{{ company.phone }}" title="Copy phone" aria-label="Copy company phone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
+        </div>
+        {% endif %} {% if company.email %}
+        <div>
+          {{ company.email }}
+          <button class="copy-control" type="button" data-copy-text="{{ company.email }}" title="Copy email" aria-label="Copy company email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
+        </div>
+        {% endif %} {% if not company.phone and not company.email %}
+        <div class="company-contact-empty">-</div>
+        {% endif %}
+      </td>
+      <td data-label="Website">
+        {% if company.website_url %}<a
+          href="{{ company.website_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Website</a
+        >{% else %}-{% endif %}
+      </td>
+      <td data-label="LinkedIn">
+        {% if company.linkedin_url %}<a href="{{ company.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>{% else %}-{% endif %}
+      </td>
+      <td data-label="Status">
+        <span
+          class="status-badge{% if company.status == 'contacted' %} contacted{% endif %}"
+          >{{ company.get_status_display }}</span
+        >
+      </td>
+      <td data-label="People">
+        <a href="{% url 'company_detail' company.pk %}"
+          >{{ company.contact_count }}</a
+        >
+      </td>
+      <td data-label="Follow-up">
+        {% if company.follow_up_on %} {% if company.follow_up_on < today %}<span
+          class="follow-up-overdue"
+          >Overdue</span
+        ><br />{% endif %} {{ company.follow_up_on|date:"M j, Y" }} {% else
+        %}<span class="muted">Not set</span>{% endif %}
+      </td>
+      <td class="actions" data-label="Actions">
+        <a href="{% url 'company_detail' company.pk %}">Open</a>
+        <a href="{% url 'company_update' company.pk %}">Edit</a>
+        <button class="copy-control" type="button" data-copy-row title="Copy company row" aria-label="Copy all details for {{ company.name }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty">
+  {% if search or selected_status or selected_size %}No companies match those
+  filters.{% else %}No companies shortlisted yet. Add a company to start your
+  outreach list.{% endif %}
+</div>
+{% endif %} {% endblock %}

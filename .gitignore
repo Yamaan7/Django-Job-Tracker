@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.sqlite3
+collected_static/
 .venv/
 venv/
 env/

@@ -1,8 +1,14 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      href="{% static 'admin/img/favicon.ico' %}"
+      type="image/x-icon"
+    />
     <title>{% block title %}Job Tracker{% endblock %}</title>
     <style>
       :root {
@@ -22,6 +28,10 @@
         background: #1f4b66;
         color: white;
         padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
       }
       header a {
         color: white;
@@ -29,11 +39,28 @@
         font-size: 1.25rem;
         font-weight: bold;
       }
+      .primary-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .primary-nav a {
+        border-radius: 4px;
+        font-size: 0.95rem;
+        padding: 0.55rem 0.75rem;
+      }
+      .primary-nav a.active,
+      .primary-nav a:hover {
+        background: #ffffff24;
+      }
       main {
         max-width: 960px;
         margin: 2rem auto;
         padding: 0 1rem 2rem;
         width: 100%;
+      }
+      main.wide-main {
+        max-width: 1760px;
       }
       .toolbar {
         display: flex;
@@ -93,29 +120,113 @@
         font-size: 1.5rem;
         font-variant-numeric: tabular-nums;
       }
+      .dashboard.five-metrics {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+      .company-profile {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1px;
+        margin: 1.25rem 0;
+        border: 1px solid #d6dadd;
+        background: #d6dadd;
+      }
+      .company-profile div {
+        min-width: 0;
+        padding: 0.85rem 1rem;
+        background: white;
+        overflow-wrap: anywhere;
+      }
+      .company-profile dt {
+        margin-bottom: 0.3rem;
+        color: #58656f;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .company-profile dd {
+        margin: 0;
+      }
+      .company-description {
+        margin-top: 1.25rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid #d6dadd;
+        background: white;
+        overflow-wrap: anywhere;
+      }
+      .company-description h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.15rem;
+      }
+      .company-description p {
+        margin: 0;
+      }
+      .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+        background: #e9eef1;
+        color: #25313c;
+        white-space: nowrap;
+      }
+      .status-badge.contacted {
+        background: #e4f2e9;
+        color: #205d3e;
+      }
+      .follow-up-overdue {
+        color: #9c3030;
+        font-weight: bold;
+      }
+      .muted {
+        color: #66727c;
+      }
       .filters {
         display: grid;
         grid-template-columns:
-          minmax(220px, 1.4fr) repeat(2, minmax(140px, 0.7fr))
+          minmax(280px, 2fr) repeat(3, minmax(170px, 1fr))
           auto;
         align-items: end;
-        gap: 1rem;
+        gap: 0.9rem;
         max-width: none;
         margin-bottom: 1.25rem;
-        padding: 1rem;
+        padding: 1.1rem;
         border: 1px solid #d6dadd;
-        box-shadow: 0 1px 4px #d6dadd;
         background: white;
       }
-      .filter-field label {
-        margin: 0 0 0.35rem;
-        font-size: 0.85rem;
-      }
-      .filter-field {
+      .filters .filter-field {
+        display: grid;
+        align-content: end;
+        gap: 0.4rem;
         min-width: 0;
       }
-      .filter-field select {
-        padding: 0.55rem;
+      .filters .filter-field label {
+        margin: 0;
+        color: #46545e;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .filters input,
+      .filters select {
+        width: 100%;
+        height: 2.7rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid #bcc6cc;
+        border-radius: 4px;
+        background: white;
+        color: #25313c;
+        font: inherit;
+      }
+      .filters input:focus,
+      .filters select:focus {
+        border-color: #287d55;
+        outline: 2px solid #287d5533;
+      }
+      .filters .filters-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 2.7rem;
+        white-space: nowrap;
       }
       .sort-options {
         min-width: 0;
@@ -173,6 +284,45 @@
         background: #e9eef1;
         font-size: 0.9rem;
       }
+      .company-table-wrap {
+        width: 100%;
+        border: 1px solid #d6dadd;
+        background: white;
+      }
+      .company-table {
+        width: 100%;
+        table-layout: auto;
+        box-shadow: none;
+      }
+      .company-table th,
+      .company-table td {
+        padding: 0.8rem 0.75rem;
+        border: 1px solid #d6dadd;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+      }
+      .company-table .company-contact-cell > div {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        min-width: 0;
+      }
+      .company-table .company-contact-cell span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .company-table .company-contact-empty {
+        color: #66727c;
+        text-align: center;
+      }
+      .company-table .copy-control {
+        flex: 0 0 2rem;
+      }
+      .company-table .company-number,
+      .company-table .actions {
+        text-align: center;
+        white-space: nowrap;
+      }
       td.actions {
         white-space: normal;
       }
@@ -190,19 +340,50 @@
       form p {
         margin: 0 0 1rem;
       }
-      label {
+      form.company-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+      form.company-form p {
+        min-width: 0;
+        margin: 0;
+      }
+      form.company-form p:has(textarea) {
+        grid-column: 1 / -1;
+      }
+      form.company-form .form-actions {
+        grid-column: 1 / -1;
+      }
+      form.company-form label {
         display: block;
-        margin: 1rem 0 0.35rem;
+        margin: 0 0 0.4rem;
         font-weight: bold;
       }
-      input,
-      select {
+      form.company-form input,
+      form.company-form select,
+      form.company-form textarea {
+        display: block;
         width: 100%;
-        box-sizing: border-box;
         padding: 0.65rem;
         border: 1px solid #bcc6cc;
         border-radius: 4px;
         font: inherit;
+      }
+      form.company-form input,
+      form.company-form select {
+        height: 2.7rem;
+      }
+      form.company-form textarea {
+        min-height: 6rem;
+        line-height: 1.4;
+        resize: vertical;
+      }
+      form.company-form .helptext {
+        display: block;
+        margin-top: 0.35rem;
+        color: #66727c;
+        font-size: 0.85rem;
       }
       .errorlist {
         color: #b13b3b;
@@ -214,6 +395,32 @@
         gap: 0.6rem;
         flex-wrap: wrap;
       }
+      .copy-control {
+        display: inline-grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border: 1px solid #c7d0d5;
+        border-radius: 4px;
+        background: white;
+        color: #31596c;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      .copy-control svg {
+        width: 1rem;
+        height: 1rem;
+      }
+      .copy-control:hover,
+      .copy-control:focus-visible {
+        background: #e9eef1;
+        outline: 2px solid #287d55;
+        outline-offset: 1px;
+      }
+      .copy-control.copied {
+        color: #205d3e;
+      }
       .empty {
         background: white;
         padding: 2rem;
@@ -222,6 +429,11 @@
       @media (max-width: 700px) {
         header {
           padding: 1rem;
+          flex-wrap: wrap;
+        }
+        .primary-nav {
+          width: 100%;
+          margin: -0.35rem 0 0 -0.4rem;
         }
         main {
           margin: 1.25rem auto 0;
@@ -237,6 +449,9 @@
         }
         .filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .filters .filter-search {
+          grid-column: 1 / -1;
         }
         .sort-options {
           grid-column: 1 / -1;
@@ -315,6 +530,12 @@
         .dashboard {
           grid-template-columns: 1fr;
         }
+        .dashboard.five-metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .company-profile {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
         .metric {
           padding: 0.75rem 1rem;
         }
@@ -328,14 +549,103 @@
         .filter-field {
           width: 100%;
         }
-        .filters > .button {
+        .filters .filters-reset {
           grid-column: 1 / -1;
+        }
+      }
+      @media (max-width: 560px) {
+        form.company-form {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <header><a href="{% url 'application_list' %}">Job Tracker</a></header>
-    <main>{% block content %}{% endblock %}</main>
+    <header>
+      <a href="{% url 'application_list' %}">Job Tracker</a>
+      <nav class="primary-nav" aria-label="Main navigation">
+        <a
+          href="{% url 'application_list' %}"
+          class="{% if request.resolver_match.url_name == 'application_list' or request.resolver_match.url_name == 'application_create' or request.resolver_match.url_name == 'application_update' or request.resolver_match.url_name == 'application_delete' %}active{% endif %}"
+          >Applications</a
+        >
+        <a
+          href="{% url 'company_list' %}"
+          class="{% if request.resolver_match.url_name == 'company_list' or request.resolver_match.url_name == 'company_create' or request.resolver_match.url_name == 'company_detail' or request.resolver_match.url_name == 'company_update' or request.resolver_match.url_name == 'company_delete' or request.resolver_match.url_name == 'contact_create' or request.resolver_match.url_name == 'contact_update' or request.resolver_match.url_name == 'contact_delete' %}active{% endif %}"
+          >Companies</a
+        >
+      </nav>
+    </header>
+    <main class="{% block main_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+    <script>
+      function fallbackCopy(text) {
+        const field = document.createElement("textarea");
+        field.value = text;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        const copied = document.execCommand("copy");
+        field.remove();
+        return copied;
+      }
+
+      function companyRowText(button) {
+        const row = button.closest("tr");
+        const headers = Array.from(
+          row.closest("table").querySelectorAll("thead th"),
+        );
+        const cells = Array.from(row.cells).slice(0, -1);
+        return cells
+          .map((cell, index) => {
+            const content = cell.cloneNode(true);
+            content
+              .querySelectorAll(".copy-control")
+              .forEach((control) => control.remove());
+            content.querySelectorAll("a").forEach((link) => {
+              if (["Website", "LinkedIn"].includes(link.textContent.trim())) {
+                link.replaceWith(document.createTextNode(link.href));
+              }
+            });
+            const value = content.innerText.trim().replace(/\s+/g, " ");
+            return value ? `${headers[index].innerText.trim()}: ${value}` : "";
+          })
+          .filter(Boolean)
+          .join("\n");
+      }
+
+      document.addEventListener("click", async (event) => {
+        const button = event.target.closest(
+          "[data-copy-text], [data-copy-row]",
+        );
+        if (!button) return;
+        const text = button.hasAttribute("data-copy-row")
+          ? companyRowText(button)
+          : button.dataset.copyText;
+        if (!text) return;
+
+        let copied = false;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            copied = true;
+          } else {
+            copied = fallbackCopy(text);
+          }
+        } catch {
+          copied = fallbackCopy(text);
+        }
+
+        const originalTitle = button.title;
+        button.title = copied ? "Copied" : "Copy failed";
+        button.classList.toggle("copied", copied);
+        window.setTimeout(() => {
+          button.title = originalTitle;
+          button.classList.remove("copied");
+        }, 1200);
+      });
+    </script>
   </body>
 </html>

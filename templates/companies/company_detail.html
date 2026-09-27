@@ -1,0 +1,195 @@
+{% extends "base.html" %} {% block content %}
+<div class="toolbar">
+  <h1>{{ company.name }}</h1>
+  <div class="form-actions">
+    <a class="button" href="{% url 'contact_create' company.pk %}"
+      >Add person</a
+    >
+    <a class="button secondary" href="{% url 'company_update' company.pk %}"
+      >Edit company</a
+    >
+    <a class="button danger" href="{% url 'company_delete' company.pk %}"
+      >Delete</a
+    >
+  </div>
+</div>
+<p><a href="{% url 'company_list' %}">Back to companies</a></p>
+
+<dl class="company-profile">
+  <div>
+    <dt>Size</dt>
+    <dd>{{ company.get_size_display }}</dd>
+  </div>
+  <div>
+    <dt>Category</dt>
+    <dd>{{ company.category|default:"-" }}</dd>
+  </div>
+  <div>
+    <dt>Location</dt>
+    <dd>{{ company.location|default:"-" }}</dd>
+  </div>
+  <div>
+    <dt>Phone</dt>
+    <dd>
+      {{ company.phone|default:"-" }} {% if company.phone %}<button
+        class="copy-control"
+        type="button"
+        data-copy-text="{{ company.phone }}"
+        title="Copy phone"
+        aria-label="Copy company phone"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect width="14" height="14" x="8" y="8" rx="2" />
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+        </svg></button
+      >{% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt>Email</dt>
+    <dd>
+      {{ company.email|default:"-" }} {% if company.email %}<button
+        class="copy-control"
+        type="button"
+        data-copy-text="{{ company.email }}"
+        title="Copy email"
+        aria-label="Copy company email"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect width="14" height="14" x="8" y="8" rx="2" />
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+        </svg></button
+      >{% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt>Website</dt>
+    <dd>
+      {% if company.website_url %}
+      <a
+        href="{{ company.website_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >{{ company.website_url }}</a
+      >
+      {% else %}-{% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt>LinkedIn</dt>
+    <dd>
+      {% if company.linkedin_url %}<a
+        href="{{ company.linkedin_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Company profile</a
+      >{% else %}-{% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt>Outreach status</dt>
+    <dd>
+      <span
+        class="status-badge{% if company.status == 'contacted' %} contacted{% endif %}"
+        >{{ company.get_status_display }}</span
+      >
+    </dd>
+  </div>
+  <div>
+    <dt>Last contacted</dt>
+    <dd>{{ company.last_contacted_on|date:"M j, Y"|default:"-" }}</dd>
+  </div>
+  <div>
+    <dt>Follow-up</dt>
+    <dd>
+      <span class="{{ company.follow_up_class }}"
+        >{{ company.follow_up_display }}</span
+      >
+    </dd>
+  </div>
+</dl>
+
+<div class="toolbar">
+  <h2>People to contact <span class="muted">({{ contacts|length }})</span></h2>
+  <a class="button" href="{% url 'contact_create' company.pk %}">Add person</a>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email / contact</th>
+      <th>LinkedIn</th>
+      <th>Status</th>
+      <th>Last contacted</th>
+      <th>Follow-up</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contact in contacts %}
+    <tr>
+      <td data-label="Name"><strong>{{ contact.name }}</strong></td>
+      <td data-label="Role">{{ contact.role|default:"-" }}</td>
+      <td data-label="Email / contact">
+        {{ contact.contact_info|default:"-" }}
+      </td>
+      <td data-label="LinkedIn">
+        {% if contact.linkedin_url %}<a
+          href="{{ contact.linkedin_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Profile</a
+        >{% else %}-{% endif %}
+      </td>
+      <td data-label="Status">
+        <span
+          class="status-badge{% if contact.status == 'contacted' %} contacted{% endif %}"
+          >{{ contact.get_status_display }}</span
+        >
+      </td>
+      <td data-label="Last contacted">
+        {{ contact.last_contacted_on|date:"M j, Y"|default:"-" }}
+      </td>
+      <td data-label="Follow-up">
+        <span class="{{ contact.follow_up_class }}"
+          >{{ contact.follow_up_display }}</span
+        >
+      </td>
+      <td class="actions" data-label="Actions">
+        <a href="{% url 'contact_update' contact.pk %}">Edit</a>
+        <a href="{% url 'contact_delete' contact.pk %}">Delete</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td class="empty" colspan="8">No people saved for this company yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if company.description %}
+<section
+  class="company-description"
+  aria-labelledby="company-description-title"
+>
+  <h2 id="company-description-title">About {{ company.name }}</h2>
+  <p>{{ company.description|linebreaksbr }}</p>
+</section>
+{% endif %} {% endblock content %}
