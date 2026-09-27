@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Job Tracker{% endblock %}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #25313c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-width: 0;
+      }
+      header {
+        background: #1f4b66;
+        color: white;
+        padding: 1rem 2rem;
+      }
+      header a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.25rem;
+        font-weight: bold;
+      }
+      main {
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem 2rem;
+        width: 100%;
+      }
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.7rem;
+        line-height: 1.2;
+      }
+      .page-title {
+        margin-bottom: 1.5rem;
+      }
+      .button {
+        display: inline-block;
+        background: #287d55;
+        color: white;
+        border: 0;
+        border-radius: 4px;
+        padding: 0.65rem 1rem;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        text-align: center;
+      }
+      .button.secondary {
+        background: #66727c;
+      }
+      .button.danger {
+        background: #b13b3b;
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        margin: 1.25rem 0;
+        background: #d6dadd;
+        border: 1px solid #d6dadd;
+      }
+      .metric {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 1rem 1.1rem;
+        background: white;
+      }
+      .metric span {
+        color: #58656f;
+        font-size: 0.9rem;
+      }
+      .metric strong {
+        color: #1f4b66;
+        font-size: 1.5rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .filters {
+        display: grid;
+        grid-template-columns:
+          minmax(220px, 1.4fr) repeat(2, minmax(140px, 0.7fr))
+          auto;
+        align-items: end;
+        gap: 1rem;
+        max-width: none;
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        border: 1px solid #d6dadd;
+        box-shadow: 0 1px 4px #d6dadd;
+        background: white;
+      }
+      .filter-field label {
+        margin: 0 0 0.35rem;
+        font-size: 0.85rem;
+      }
+      .filter-field {
+        min-width: 0;
+      }
+      .filter-field select {
+        padding: 0.55rem;
+      }
+      .sort-options {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+      .sort-options legend {
+        margin: 0 0 0.35rem;
+        font-size: 0.85rem;
+        font-weight: bold;
+      }
+      .sort-buttons {
+        display: inline-flex;
+        overflow: hidden;
+        border: 1px solid #aeb9c0;
+        border-radius: 4px;
+        vertical-align: middle;
+      }
+      .sort-option {
+        min-height: 2.4rem;
+        padding: 0.55rem 0.75rem;
+        border: 0;
+        background: white;
+        color: #25313c;
+        font: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+      .sort-option + .sort-option {
+        border-left: 1px solid #aeb9c0;
+      }
+      .sort-option.active {
+        background: #1f4b66;
+        color: white;
+      }
+      .sort-option:focus-visible {
+        outline: 2px solid #287d55;
+        outline-offset: -3px;
+      }
+      table {
+        width: 100%;
+        min-width: 0;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 4px #d6dadd;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.8rem;
+        border-bottom: 1px solid #e5e8eb;
+      }
+      th {
+        background: #e9eef1;
+        font-size: 0.9rem;
+      }
+      td.actions {
+        white-space: normal;
+      }
+      .actions a {
+        display: inline-block;
+        margin: 0 0.4rem 0.25rem 0;
+      }
+      form {
+        background: white;
+        width: 100%;
+        max-width: 560px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 4px #d6dadd;
+      }
+      form p {
+        margin: 0 0 1rem;
+      }
+      label {
+        display: block;
+        margin: 1rem 0 0.35rem;
+        font-weight: bold;
+      }
+      input,
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.65rem;
+        border: 1px solid #bcc6cc;
+        border-radius: 4px;
+        font: inherit;
+      }
+      .errorlist {
+        color: #b13b3b;
+        padding-left: 1.2rem;
+      }
+      .form-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .empty {
+        background: white;
+        padding: 2rem;
+        text-align: center;
+      }
+      @media (max-width: 700px) {
+        header {
+          padding: 1rem;
+        }
+        main {
+          margin: 1.25rem auto 0;
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+        }
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .toolbar .button {
+          width: 100%;
+        }
+        .filters {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .sort-options {
+          grid-column: 1 / -1;
+        }
+        table,
+        tbody,
+        tr,
+        td {
+          display: block;
+          width: 100%;
+        }
+        table {
+          background: transparent;
+          box-shadow: none;
+        }
+        thead {
+          display: none;
+        }
+        tr {
+          background: white;
+          box-shadow: 0 1px 4px #d6dadd;
+          margin-bottom: 1rem;
+          padding: 0.75rem 1rem;
+        }
+        td {
+          align-items: baseline;
+          border-bottom: 1px solid #e5e8eb;
+          display: flex;
+          gap: 0.75rem;
+          justify-content: space-between;
+          padding: 0.65rem 0;
+          text-align: right;
+          overflow-wrap: anywhere;
+        }
+        td::before {
+          color: #66727c;
+          content: attr(data-label);
+          flex: 0 0 38%;
+          font-size: 0.8rem;
+          font-weight: bold;
+          text-align: left;
+          text-transform: uppercase;
+        }
+        td:last-child {
+          border-bottom: 0;
+          display: block;
+          padding-bottom: 0.1rem;
+          text-align: left;
+        }
+        td:last-child::before {
+          display: block;
+          margin-bottom: 0.4rem;
+        }
+        td.actions a {
+          margin-bottom: 0;
+        }
+        .empty {
+          padding: 1.5rem 1rem;
+        }
+      }
+      @media (max-width: 400px) {
+        main {
+          padding-left: 0.5rem;
+          padding-right: 0.5rem;
+        }
+        form {
+          padding: 1rem;
+        }
+        .form-actions .button {
+          flex: 1 1 100%;
+          width: 100%;
+        }
+        h1 {
+          font-size: 1.45rem;
+        }
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+        .metric {
+          padding: 0.75rem 1rem;
+        }
+        .filters {
+          gap: 0.75rem;
+          padding: 0.75rem;
+        }
+        .sort-options {
+          min-width: 0;
+        }
+        .filter-field {
+          width: 100%;
+        }
+        .filters > .button {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header><a href="{% url 'application_list' %}">Job Tracker</a></header>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>

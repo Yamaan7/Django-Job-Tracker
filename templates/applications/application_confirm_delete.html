@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block title %} Delete application | Job Tracker {%
+endblock %} {% block content %}
+<h1 class="page-title">Delete application</h1>
+<form method="post">
+  {% csrf_token %}
+  <p>
+    Are you sure you want to delete
+    <strong>{{ application.post_name }}</strong> at
+    <strong>{{ application.organization }}</strong>?
+  </p>
+  <div class="form-actions">
+    <button class="button danger" type="submit">Delete</button>
+    <a class="button secondary" href="{% url 'application_list' %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

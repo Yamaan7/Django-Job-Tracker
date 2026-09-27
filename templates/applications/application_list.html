@@ -1,0 +1,100 @@
+{% extends "base.html" %} {% block content %}
+<div class="toolbar">
+  <h1>Job applications</h1>
+  <a class="button" href="{% url 'application_create' %}">Add application</a>
+</div>
+
+<section class="dashboard" aria-label="Application summary">
+  <div class="metric">
+    <span>Total applied</span><strong>{{ counts.total }}</strong>
+  </div>
+  <div class="metric">
+    <span>Pending</span><strong>{{ counts.pending }}</strong>
+  </div>
+  <div class="metric">
+    <span>Rejected</span><strong>{{ counts.rejected }}</strong>
+  </div>
+</section>
+
+<form class="filters" method="get">
+  <fieldset class="sort-options">
+    <legend>Order</legend>
+    <div class="sort-buttons">
+      <button
+        type="submit"
+        name="sort"
+        value="recent"
+        class="sort-option{% if is_recent %} active{% endif %}"
+      >
+        Most recent
+      </button>
+      <button
+        type="submit"
+        name="sort"
+        value="oldest"
+        class="sort-option{% if is_oldest %} active{% endif %}"
+      >
+        Oldest
+      </button>
+    </div>
+  </fieldset>
+  <div class="filter-field">
+    <label for="filter-month">Month</label>
+    <select id="filter-month" name="month" onchange="this.form.submit()">
+      <option value="">All months</option>
+      {% for value, label, is_selected in month_choices %}
+      <option value="{{ value }}" {% if is_selected %}selected{% endif %}>
+        {{ label }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-field">
+    <label for="filter-year">Year</label>
+    <select id="filter-year" name="year" onchange="this.form.submit()">
+      <option value="">All years</option>
+      {% for value, is_selected in year_choices %}
+      <option value="{{ value }}" {% if is_selected %}selected{% endif %}>
+        {{ value }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <a class="button secondary" href="{% url 'application_list' %}">Reset</a>
+</form>
+
+{% if applications %}
+<table>
+  <thead>
+    <tr>
+      <th>Position</th>
+      <th>Organization</th>
+      <th>Fee paid</th>
+      <th>Date applied</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for application in applications %}
+    <tr>
+      <td data-label="Position">{{ application.post_name }}</td>
+      <td data-label="Organization">{{ application.organization }}</td>
+      <td data-label="Fee paid">{{ application.fee_paid }}</td>
+      <td data-label="Date applied">
+        {{ application.date_applied|date:"M j, Y" }}
+      </td>
+      <td data-label="Status">{{ application.status }}</td>
+      <td class="actions">
+        <a href="{% url 'application_update' application.pk %}">Edit</a>
+        <a href="{% url 'application_delete' application.pk %}">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">
+  No applications yet. Add your first one to start tracking.
+</div>
+{% endif %} {% endblock %}
